@@ -1,653 +1,842 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="h-100">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ecureuil - the Windows package manager</title>
-  <style type="text/css">
-    body {
-      background-color: #dcdcdc;
-      background-image: -webkit-radial-gradient(40% 30%, ellipse cover, #ffffff 0%, #f0f3f6 45%, #d1d7de 100%);
-      background-image: -ms-radial-gradient(40% 30%, ellipse cover, #ffffff 0%, #f0f3f6 45%, #d1d7de 100%);
-      background-image: radial-gradient(ellipse at 40%, 30%, #ffffff 0%, #f0f3f6 45%, #d1d7de 100%);
-      background-attachment: fixed;
-      font-family: Tahoma, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    
-    .header-area {
-      text-align: left;
-      margin-bottom: 0;
-    }
-    
-    /* Title of the page */
-    .main-title {
-      display: inline-block;
-      font-size: 26px;
-      font-weight: bold;
-      color: #0D0D0D;
-      margin: 0;
-      line-height: 1.1;
-      vertical-align: baseline;
-    }
-    
-    /* Subtitle of Ecureuil */
-    .subtitle {
-      display: inline-block;
-      font-size: 14px;
-      font-style: italic;
-      color: #555555;
-      margin-left: 12px;
-    }
-    
-    /* Red bar that goes across the screen */
-    .bar {
-      width: 100%;
-      height: 10px;
-      background-color: #7a1414;
-      position: relative;
-      border-top: 1px solid #ffffff;
-      border-bottom: 1px solid #4a0d0d;
-      margin: 0;
-      padding: 0.5px 0;
-    }
-    
-    .mosaic-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      font-size: 0;
-      white-space: nowrap;
-      opacity: 0.35;
-      filter: alpha(opacity=35);
-      overflow: hidden;
-    }
-    
-    .tile {
-      display: inline-block;
-      width: 25px;
-      height: 15px;
-      margin: 1px;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-    }
-    .t1 { background-color: #992222; }
-    .t2 { background-color: #b83838; }
-    .t3 { background-color: #d15252; }
-    .t4 { background-color: #7a1515; }
-    .t5 { background-color: #e67373; }
-    .t6 { background-color: #ffffff; }
-    
-    /* Links that are on the bar itself */
-    .bar-content a {
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 11px;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-      margin-left: 15px;
-      display: inline-block;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
-      opacity: 35%;
-    }
-    
-    .download-dropdown {
-      display: inline-block;
-      position: relative;
-      margin-left: 15px;
-      vertical-align: baseline;
-      line-height: inherit;
-    }
-    
-    .download-dropdown a.btn-download {
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 11px;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-      margin-left: 0;
-      display: inline-block;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-      opacity: 65%;
-    }
-    
-    .download-dropdown:hover a.btn-download {
-      color: #ffcccc;
-      opacity: 100%;
-    }
-    
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      min-width: 140px;
-      background-color: #7a1414;
-      border: 1px solid #4a0d0d;
-      border-top: none;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-      z-index: 9999;
-      margin-top: -4px;
-      padding: 4px 0;
-      text-align: left;
-    }
-    
-    .download-dropdown:hover .dropdown-menu {
-      display: block;
-    }
-    
-    .dropdown-menu a {
-      display: block !important;
-      padding: 6px 12px !important;
-      color: #ffffff !important;
-      font-size: 11px !important;
-      font-weight: bold !important;
-      text-decoration: none !important;
-      white-space: nowrap !important;
-      opacity: 90% !important;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
-      margin: 0 !important;
-    }
-    
-    .dropdown-menu a:hover {
-      background-color: #992222 !important;
-      color: #ffffff !important;
-      opacity: 100% !important;
-      text-decoration: none !important;
-    }
-    
-    /* What happens when you hover over regular links */
-    .bar-content a:hover {
-      color: #ffcccc;
-      text-decoration: underline;
-      opacity: 85%;
-    }
-    
-    .bar-overflow {
-      display: none;
-      position: relative;
-      vertical-align: baseline;
-      line-height: inherit;
-    }
-    
-    .btn-chevron {
-      color: #ffffff !important;
-      text-decoration: none !important;
-      font-size: 12px !important;
-      font-weight: bold !important;
-      letter-spacing: -1px !important;
-      padding: 0 4px !important;
-      display: inline-block !important;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
-      opacity: 85% !important;
-      cursor: pointer;
-    }
-    
-    .bar-overflow:hover .btn-chevron {
-      color: #ffcccc !important;
-      opacity: 100% !important;
-    }
-    
-    .bar-overflow:hover .dropdown-menu {
-      display: block;
-    }
-    
-    /* Container of the links itself in the bar */
-    .bar-content {
-      position: relative;
-      z-index: 2;
-      width: 760px;
-      max-width: 90%;
-      margin: 0 auto;
-      padding: 0px 25px;
-      box-sizing: border-box;
-      text-align: right;
-      line-height: 1.2;
-      top: -5.5px;
-      white-space: nowrap;
-    }
-    
-    /* Responsive: on screens under 650px, collapse links into chevron >> */
-    @media (max-width: 650px) {
-      .bar-desktop-links {
-        display: none !important;
-      }
-      .bar-overflow {
-        display: inline-block !important;
-      }
-    }
-    
-    /* White shape that's in the centre */
-    .wrapper {
-      width: 760px;
-      max-width: 90%;
-      margin: 40px auto;
-      background-color: #f7f7f7;
-      border: 1px solid #dedede;
-      padding: 25px;
-      box-sizing: border-box;
-      text-align: center;
-    }
-    
-    /* Text etc */
-    .content-section {
-      text-align: left;
-      color: #2b2b2b;
-      line-height: 1.5;
-    }
-    
-    .app-screenshot-left {
-      float: left;
-      margin-right: 20px;
-      margin-bottom: -100px;
-      /*border: 1px solid #999999;*/
-      padding: 2px;
-    }
-    
-    .app-screenshot-right {
-      float: right;
-      margin-right: 20px;
-      margin-bottom: -100px;
-     /* border: 1px solid #999999;*/
-      padding: 2px;
-    }
-    
-    /* Paragraph text */
-    .content-section p {
-      margin-top: 0;
-    }
-    
-    /* Text under the wrapper */
-    .bottom-text {
-      color: #a0a0a0;
-      font-size: 10px;
-      line-height: 1px;
-      box-sizing: border-box;
-      width: 760px;
-      max-width: 90%;
-      margin: -20px auto;
-    }
-    
-    /* Cloud of the discovered sources */
-    .source-cloud {
-      text-align: center;
-      margin: 15px 0;
-      padding: 30px;
-      background-color: #efefef;
-      border: 1px solid #dddddd;
-      line-height: 2.2;
-    }
-    
-    /* one of the sources in discovery sources that I add there manually */
-    .source-item {
-      display: inline-block;
-      position: relative;
-      text-decoration: none;
-      vertical-align: middle;
-    }
-    
-    .source-item img {
-      width: 32px;
-      height: 32px;
-      border: 1px solid #cccccc;
-      padding: 3px;
-      background-color: #ffffff;
-      display: block; 
-    }
-    
-    .source-item:hover {
-      z-index: 999;
-    }
-    
-    .source-item:hover img {
-      border-color: #570e0e;
-    }
-    
-    /* What is shown when you move the mouse on an item */
-    .source-desc {
-      display: none;
-      position: absolute;
-      left: 100%;
-      width: 220px;
-      top: 0;
-      white-space: normal;
-      background-color: #570e0e;
-      border: 2px solid #3a0808;
-      border-left: none;
-      padding: 4px 10px;
-      color: #ffffff;
-      text-align: left;
-      line-height: 1.3;
-      z-index: 1000;
-    }
-    
-    .source-item:hover .source-desc {
-      display: block;
-    }
-    
-    .source-desc strong {
-      display: block;
-      font-size: 12px;
-      color: #ffffff;
-    }
-    
-    .source-desc span {
-      display: block;
-      font-size: 11px;
-      color: #ffcccc;
-    }
-    
-    /* Various positions of images */
-    .pos-1 {
-      margin: 4px 14px;
-      top: -20px;
-    }
-    
-    .pos-1 img { width: 28px; height: 28px; }
-    
-    .pos-2 {
-      margin: 8px 8px;
-      top: 20px;
-    }
-    .pos-2 img { width: 34px; height: 34px; }
-    
-    .pos-3 {
-      margin: 3px 18px;
-      top: -3px;
-    }
-    .pos-3 img { width: 42px; height: 42px; }
-    
-    .pos-4 {
-      margin: 10px 12px;
-      top: 5px;
-    }
-    .pos-4 img { width: 26px; height: 26px; }
-    
-    .download-dropdown {
-      display: inline-block;
-      position: relative;
-      margin-left: 15px;
-    }
-    
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      min-width: 180px;
-      background-color: #992222;
-      border: 1px solid #7a1414;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-      z-index: 9999;
-      margin-top: 0px;
-      padding: 4px 0;
-      text-align: left;
-    }
-    
-    .download-dropdown:hover .dropdown-menu {
-      display: block;
-    }
-    
-    .dropdown-menu a {
-      display: block;
-      padding: 6px 14px;
-      color: #333333;
-      font-size: 11px;
-      font-weight: normal;
-      text-decoration: none;
-      white-space: nowrap;
-      opacity: 1;
-      text-shadow: none;
-      margin: 0;
-    }
-    
-    .dropdown-menu a:hover {
-      background-color: #7a1414;
-      color: #ffffff;
-      text-decoration: none;
-    }
-    
-    .clearfix {
-      clear: both;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrapper" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
-    <div class="header-area">
-      <h1 class="main-title">Ecureuil</h1>
-      <span class="subtitle" id="subTitle">There's no competition.</span>
-    </div>
-  </div>
-  
-  <div class="bar" style="margin-top: 1px;">
-    <div class="mosaic-bg">
-        <span class="tile t1"></span><span class="tile t3"></span><span class="tile
-  t2"></span><span class="tile t4"></span><span class="tile t5"></span><span
-  class="tile t1"></span><span class="tile t2"></span><span class="tile
-  t6"></span><span class="tile t3"></span><span class="tile t1"></span><span
-  class="tile t4"></span><span class="tile t2"></span><span class="tile
-  t5"></span><span class="tile t3"></span><span class="tile t1"></span><span
-  class="tile t4"></span><span class="tile t2"></span><span class="tile
-  t3"></span><span class="tile t1"></span><span class="tile t5"></span><span
-  class="tile t2"></span><span class="tile t4"></span><span class="tile
-  t3"></span><span class="tile t1"></span><span class="tile t6"></span><span
-  class="tile t2"></span><span class="tile t5"></span><span class="tile t3"></span>
-      </div>
-    
-      <!-- Link allineati a destra in primo piano -->
-      <div class="bar-content">
-        <!-- Desktop Links -->
-        <span class="bar-desktop-links">
-          <a href="https://github.com/fraaaaa4/ecureuil">REPOSITORY</a>
-          <a href="https://github.com/fraaaaa4/ecureuil-discovery-sources">DISCOVER REPO</a>
-          <a href="https://github.com/fraaaaa4/ecureuil-source-example">EXAMPLE SOURCE</a>
-          <div class="download-dropdown">
-            <a href="#" class="btn-download" style="margin-top: -1px;">DOWNLOAD</a>
-            <div class="dropdown-menu">
-              <a href="https://github.com/fraaaaa4/ecureuil/releases/download/0.3/Ecureuil.NET.4.5.zip">.NET 4.5 Version</a>
-              <a href="https://github.com/fraaaaa4/ecureuil/releases/download/0.3_NET_2/Ecureuil.NET.2.0.zip">.NET 2.0 Version</a>
-            </div>
-          </div>
-        </span>
-
-        <!-- Mobile / Small screen Overflow Chevron (>>) -->
-        <div class="bar-overflow">
-          <a href="#" class="btn-chevron" onclick="return false;">&gt;&gt;</a>
-          <div class="dropdown-menu">
-            <a href="https://github.com/fraaaaa4/ecureuil">REPOSITORY</a>
-            <a href="https://github.com/fraaaaa4/ecureuil-discovery-sources">DISCOVER REPO</a>
-            <a href="https://github.com/fraaaaa4/ecureuil-source-example">EXAMPLE SOURCE</a>
-            <hr style="border: 0; border-top: 1px solid #4a0d0d; border-bottom: 1px solid #992222; margin: 3px 0;">
-            <a href="https://github.com/fraaaaa4/ecureuil/releases/download/0.3/Ecureuil.NET.4.5.zip">DOWNLOAD (.NET 4.5)</a>
-            <a href="https://github.com/fraaaaa4/ecureuil/releases/download/0.3_NET_2/Ecureuil.NET.2.0.zip">DOWNLOAD (.NET 2.0)</a>
-          </div>
-        </div>
-      </div>
-  </div>
-  
-  <div class="wrapper" style="margin-top: 0; border-top: none; padding-top: 10px;">
-    <div class="content-section" style="margin-top: 5px;">
-      <p>
-        <strong>Ecureuil is your all-in-one package manager</strong> for all versions of Windows. 
-      </p>
-      <img src="https://github.com/fraaaaa4/ecureuil-website/raw/c2dd3d5b0ae7e6d5834642b88cfb3a57c3f3ac93/1.png" alt="Screenshot 1" class="app-screenshot-left" width="160">
-      <p>Supports <strong>Windows 2000 or superior</strong> (including Windows RT and Windows on ARM), it lets you easily install all your favourite apps from online sources, all with a single click. Discover apps, search by name or description, select the categories they interest you, group them in architecture, and much much more.
-      </p>
-      <p>
-      You can add sources to your client either via an URL, or by adding sources from the <strong>Discover sources</strong> section; on the latter, you don't need to touch your keyboard once, all done via the mouse!
-      </p>
-      <img src="https://github.com/fraaaaa4/ecureuil-website/raw/c2dd3d5b0ae7e6d5834642b88cfb3a57c3f3ac93/2.png" alt="Screenshot 2" class="app-screenshot-right" width="160">
-      <p>
-      Before installing an app, you can check various details of an app, such as its screenshots, what type of installer is, additional links inserted by the developer, languages supported etc. Compatibility is also checked automatically based on your current operating system and architecture.
-      </p>
-      <img src="https://github.com/fraaaaa4/ecureuil-website/raw/c2dd3d5b0ae7e6d5834642b88cfb3a57c3f3ac93/3.png" alt="Screenshot 3" class="app-screenshot-left" width="160">
-      <p>
-      It manages portable and apps with setup as if they were one. If your app is portable, it gets added automatically to the start menu and desktop (if you will); if your app is inside a zip file, it'll extract it and automatically execute the setup file. 
-      </p>
-      <p>
-      And to uninstall a portable app, you can do that directly from Ecureuil, as if it was installed with a setup! Fully customisable on where you choose to save or store caches and all.
-      </p>
-    <hr style="border: 0; border-top: 1px solid #DBDBDB; margin: 15px -5px;">
-    <p>
-      Discover some of the featured sources! Click on an image to copy its link, which then you can add directly in Ecureuil.
-    </p>
-    </div>
-    
-    <div class="source-cloud" id="sourceCloud">
-    
-      <a href="https://fraaaaa4.github.io/Ecureuil-fratta-apps/sources.json" class="source-item pos-1">
-        <img src="https://avatars.githubusercontent.com/u/87281326?v=4">
-        <div class="source-desc">
-          <strong>Fratta's Ecureuil source</strong>
-          <span>The developer of Ecureuil's personal source</span>
-        </div>
-      </a>
-      <a href="https://hamed7ir.github.io/ecureuil-hamed7ir-apps/sources.json" class="source-item pos-3">
-        <img src="https://avatars.githubusercontent.com/u/30177186?v=4">
-        <div class="source-desc">
-          <strong>hamed7ir's Ecureuil source</strong>
-          <span>ARM32 applications for Windows RT and Windows 10 ARM32, built and tested on Surface RT and Surface 2 hardware.</span>
-        </div>
-      </a>
-    </div>
-  </div>
-  <script type="text/javascript">
-    (function() {
-      var cloud = document.getElementById("sourceCloud");
-      if (!cloud) return;
-      var items = cloud.getElementsByTagName("a");
-      
-      var targetX = 0, targetY = 0;
-      var currentX = 0, currentY = 0;
-      var isAnimating = false;
-      
-      cloud.onmousemove = function(e) {
-        e = e || window.event;
-        var rect = cloud.getBoundingClientRect();
-        targetX = (e.clientX - rect.left) - (rect.width / 2);
-        targetY = (e.clientY - rect.top) - (rect.height / 2);
-        
-        if (!isAnimating) {
-          isAnimating = true;
-          animate();
-        }
-      };
-      
-      cloud.onmouseleave = function() {
-        targetX = 0;
-        targetY = 0;
-        if (!isAnimating) {
-          isAnimating = true;
-          animate();
-        }
-      };
-      
-      var baseTop = [];
-      for (var k = 0; k < items.length; k++) {
-        var computed = window.getComputedStyle ? window.getComputedStyle(items[k]) : items[k].currentStyle;
-        baseTop[k] = parseFloat(computed ? computed.top : 0) || 0;
-      }
-      
-      function animate() {
-        currentX += (targetX - currentX) * 0.08;
-        currentY += (targetY - currentY) * 0.08;
-        
-        for (var i = 0; i < items.length; i++) {
-          var factor = (i % 3 + 1) * 0.04;
-          items[i].style.left = (currentX * factor) + "px";
-          items[i].style.top = (baseTop[i] + currentY * factor) + "px";
-        }
-        
-        if (Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05) {
-          if (window.requestAnimationFrame) {
-            requestAnimationFrame(animate);
-          } else {
-            setTimeout(animate, 16);
-          }
-        } else {
-          currentX = targetX;
-          currentY = targetY;
-          for (var j = 0; j < items.length; j++) {
-            if (targetX === 0 && targetY === 0) {
-              items[j].style.left = "";
-              items[j].style.top = "";
-            } else {
-              var f = (j % 3 + 1) * 0.04;
-              items[j].style.left = (currentX * f) + "px";
-              items[j].style.top = (baseTop[j] + currentY * f) + "px";
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Ecureuil - the Windows package manager</title>
+        <style type="text/css">
+            body {
+                background-color: #dcdcdc;
+                background-image: -webkit-radial-gradient(
+                    40% 30%,
+                    ellipse cover,
+                    #ffffff 0%,
+                    #f0f3f6 45%,
+                    #d1d7de 100%
+                );
+                background-image: -ms-radial-gradient(
+                    40% 30%,
+                    ellipse cover,
+                    #ffffff 0%,
+                    #f0f3f6 45%,
+                    #d1d7de 100%
+                );
+                background-image: radial-gradient(
+                    ellipse at 40%,
+                    30%,
+                    #ffffff 0%,
+                    #f0f3f6 45%,
+                    #d1d7de 100%
+                );
+                background-attachment: fixed;
+                font-family: Tahoma, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
             }
-          }
-          isAnimating = false;
-        }
-      }
-      
-      var subTitleElement = document.getElementById("subTitle");
-      if (subTitleElement) {
-        var subtitles = [
-          "There's no competition.",
-          "It's that easy.",
-          "no way, cydia for winrt",
-          "Yes it's on ARM too",
-          "Install with one click btw",
-          "Hyperdemo!",
-          "Windows RT rules",
-          "Who said retro is useless?",
-          "Developers! Developers! Developers!",
-          "Create your own sources too! Anybody can!"
-        ];
-        
-        var randomIndex = Math.floor(Math.random() * subtitles.length);
-        subTitleElement.innerHTML = subtitles[randomIndex];
-      }
-      
-      function copyText(text) {
-        if (window.clipboardData && window.clipboardData.setData) {
-          return window.clipboardData.setData("Text", text);
-        }
-        else if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text);
-        }
-        else {
-          var textarea = document.createElement("textarea");
-          textarea.value = text;
-          textarea.style.position = "fixed";
-          textarea.style.left = "-9999px";
-          document.body.appendChild(textarea);
-          textarea.select();
-          try { document.execCommand("copy"); } catch (err) {}
-          document.body.removeChild(textarea);
-        }
-      }
-      
-      for (var i = 0; i < items.length; i++) {
-        items[i].onclick = function(e) {
-          e = e || window.event;
-          
-          if (e.preventDefault) e.preventDefault(); else e.returnValue = false;
-          var linkToCopy = this.getAttribute("href"); 
-          copyText(linkToCopy);
-          
-          var desc = this.getElementsByTagName("strong")[0];
-          if (desc) {
-            var originalText = desc.innerHTML;
-            desc.innerHTML = "Link copied";
-            var el = desc;
-            setTimeout(function() {
-              el.innerHTML = originalText;
-            }, 1200);
-          }
-          return false;
-        };
-      }
-    })();
-  </script>
-  
-  <div class="bottom-text">
-  <span>Made in 2026 by Fratta</span>
-  </div>
-</body>
+
+            .header-area {
+                text-align: left;
+                margin-bottom: 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-end;
+                position: relative;
+            }
+
+            .header-area img {
+                max-height: none;
+                height: 140px;
+                width: auto;
+                margin-top: -35px;
+                margin-bottom: -40px;
+                position: relative;
+                z-index: 1;
+                clip-path: inset(-100px 0px 25px 0px);
+            }
+
+            /* Title of the page */
+            .main-title {
+                display: inline-block;
+                font-size: 26px;
+                font-weight: bold;
+                color: #0d0d0d;
+                margin: 0;
+                line-height: 1.1;
+                vertical-align: baseline;
+            }
+
+            /* Subtitle of Ecureuil */
+            .subtitle {
+                display: inline-block;
+                font-size: 14px;
+                font-style: italic;
+                color: #555555;
+                margin-left: 12px;
+            }
+
+            /* Red bar that goes across the screen */
+            .bar {
+                width: 100%;
+                height: 10px;
+                background-color: #7a1414;
+                position: relative;
+                border-top: 1px solid #ffffff;
+                border-bottom: 1px solid #4a0d0d;
+                margin: 0;
+                padding: 0.5px 0;
+                z-index: 10;
+            }
+
+            .mosaic-bg {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                font-size: 0;
+                white-space: nowrap;
+                opacity: 0.35;
+                filter: alpha(opacity=35);
+                overflow: hidden;
+            }
+
+            .tile {
+                display: inline-block;
+                width: 25px;
+                height: 15px;
+                margin: 1px;
+                border: 1px solid rgba(255, 255, 255, 0.4);
+            }
+            .t1 {
+                background-color: #992222;
+            }
+            .t2 {
+                background-color: #b83838;
+            }
+            .t3 {
+                background-color: #d15252;
+            }
+            .t4 {
+                background-color: #7a1515;
+            }
+            .t5 {
+                background-color: #e67373;
+            }
+            .t6 {
+                background-color: #ffffff;
+            }
+
+            /* Links that are on the bar itself */
+            .bar-content a {
+                color: #ffffff;
+                text-decoration: none;
+                font-size: 11px;
+                font-weight: bold;
+                letter-spacing: 0.5px;
+                margin-left: 15px;
+                display: inline-block;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+                opacity: 35%;
+            }
+
+            .download-dropdown {
+                display: inline-block;
+                position: relative;
+                margin-left: 15px;
+                vertical-align: baseline;
+                line-height: inherit;
+            }
+
+            .download-dropdown a.btn-download {
+                color: #ffffff;
+                text-decoration: none;
+                font-size: 11px;
+                font-weight: bold;
+                letter-spacing: 0.5px;
+                margin-left: 0;
+                display: inline-block;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                opacity: 65%;
+            }
+
+            .download-dropdown:hover a.btn-download {
+                color: #ffcccc;
+                opacity: 100%;
+            }
+
+            .dropdown-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                right: 0;
+                min-width: 140px;
+                background-color: #7a1414;
+                border: 1px solid #4a0d0d;
+                border-top: none;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+                z-index: 9999;
+                margin-top: -4px;
+                padding: 4px 0;
+                text-align: left;
+            }
+
+            .download-dropdown:hover .dropdown-menu {
+                display: block;
+            }
+
+            .dropdown-menu a {
+                display: block !important;
+                padding: 6px 12px !important;
+                color: #ffffff !important;
+                font-size: 11px !important;
+                font-weight: bold !important;
+                text-decoration: none !important;
+                white-space: nowrap !important;
+                opacity: 90% !important;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
+                margin: 0 !important;
+            }
+
+            .dropdown-menu a:hover {
+                background-color: #992222 !important;
+                color: #ffffff !important;
+                opacity: 100% !important;
+                text-decoration: none !important;
+            }
+
+            /* What happens when you hover over regular links */
+            .bar-content a:hover {
+                color: #ffcccc;
+                text-decoration: underline;
+                opacity: 85%;
+            }
+
+            .bar-overflow {
+                display: none;
+                position: relative;
+                vertical-align: baseline;
+                line-height: inherit;
+            }
+
+            .btn-chevron {
+                color: #ffffff !important;
+                text-decoration: none !important;
+                font-size: 12px !important;
+                font-weight: bold !important;
+                letter-spacing: -1px !important;
+                padding: 0 4px !important;
+                display: inline-block !important;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
+                opacity: 85% !important;
+                cursor: pointer;
+            }
+
+            .bar-overflow:hover .btn-chevron {
+                color: #ffcccc !important;
+                opacity: 100% !important;
+            }
+
+            .bar-overflow:hover .dropdown-menu {
+                display: block;
+            }
+
+            /* Container of the links itself in the bar */
+            .bar-content {
+                position: relative;
+                z-index: 2;
+                width: 760px;
+                max-width: 90%;
+                margin: 0 auto;
+                padding: 0px 25px;
+                box-sizing: border-box;
+                text-align: right;
+                line-height: 1.2;
+                top: -5.5px;
+                white-space: nowrap;
+            }
+
+            /* Responsive: on screens under 650px, collapse links into chevron >> */
+            @media (max-width: 650px) {
+                .bar-desktop-links {
+                    display: none !important;
+                }
+                .bar-overflow {
+                    display: inline-block !important;
+                }
+            }
+
+            /* White shape that's in the centre */
+            .wrapper {
+                width: 760px;
+                max-width: 90%;
+                margin: 40px auto;
+                background-color: #f7f7f7;
+                border: 1px solid #dedede;
+                padding: 25px;
+                box-sizing: border-box;
+                text-align: center;
+            }
+
+            /* Text etc */
+            .content-section {
+                text-align: left;
+                color: #2b2b2b;
+                line-height: 1.5;
+            }
+
+            .app-screenshot-left {
+                float: left;
+                margin-right: 20px;
+                margin-bottom: -100px;
+                /*border: 1px solid #999999;*/
+                padding: 2px;
+            }
+
+            .app-screenshot-right {
+                float: right;
+                margin-right: 20px;
+                margin-bottom: -100px;
+                /* border: 1px solid #999999;*/
+                padding: 2px;
+            }
+
+            /* Paragraph text */
+            .content-section p {
+                margin-top: 0;
+            }
+
+            /* Text under the wrapper */
+            .bottom-text {
+                color: #a0a0a0;
+                font-size: 10px;
+                line-height: 1px;
+                box-sizing: border-box;
+                width: 760px;
+                max-width: 90%;
+                margin: -20px auto;
+            }
+
+            /* Cloud of the discovered sources */
+            .source-cloud {
+                text-align: center;
+                margin: 15px 0;
+                padding: 30px;
+                background-color: #efefef;
+                border: 1px solid #dddddd;
+                line-height: 2.2;
+            }
+
+            /* one of the sources in discovery sources that I add there manually */
+            .source-item {
+                display: inline-block;
+                position: relative;
+                text-decoration: none;
+                vertical-align: middle;
+            }
+
+            .source-item img {
+                width: 32px;
+                height: 32px;
+                border: 1px solid #cccccc;
+                padding: 3px;
+                background-color: #ffffff;
+                display: block;
+            }
+
+            .source-item:hover {
+                z-index: 999;
+            }
+
+            .source-item:hover img {
+                border-color: #570e0e;
+            }
+
+            /* What is shown when you move the mouse on an item */
+            .source-desc {
+                display: none;
+                position: absolute;
+                left: 100%;
+                width: 220px;
+                top: 0;
+                white-space: normal;
+                background-color: #570e0e;
+                border: 2px solid #3a0808;
+                border-left: none;
+                padding: 4px 10px;
+                color: #ffffff;
+                text-align: left;
+                line-height: 1.3;
+                z-index: 1000;
+            }
+
+            .source-item:hover .source-desc {
+                display: block;
+            }
+
+            .source-desc strong {
+                display: block;
+                font-size: 12px;
+                color: #ffffff;
+            }
+
+            .source-desc span {
+                display: block;
+                font-size: 11px;
+                color: #ffcccc;
+            }
+
+            /* Various positions of images */
+            .pos-1 {
+                margin: 4px 14px;
+                top: -20px;
+            }
+
+            .pos-1 img {
+                width: 28px;
+                height: 28px;
+            }
+
+            .pos-2 {
+                margin: 8px 8px;
+                top: 20px;
+            }
+            .pos-2 img {
+                width: 34px;
+                height: 34px;
+            }
+
+            .pos-3 {
+                margin: 3px 18px;
+                top: -3px;
+            }
+            .pos-3 img {
+                width: 42px;
+                height: 42px;
+            }
+
+            .pos-4 {
+                margin: 10px 12px;
+                top: 5px;
+            }
+            .pos-4 img {
+                width: 26px;
+                height: 26px;
+            }
+
+            .download-dropdown {
+                display: inline-block;
+                position: relative;
+                margin-left: 15px;
+            }
+
+            .dropdown-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                right: 0;
+                min-width: 180px;
+                background-color: #992222;
+                border: 1px solid #7a1414;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+                z-index: 9999;
+                margin-top: 0px;
+                padding: 4px 0;
+                text-align: left;
+            }
+
+            .download-dropdown:hover .dropdown-menu {
+                display: block;
+            }
+
+            .dropdown-menu a {
+                display: block;
+                padding: 6px 14px;
+                color: #333333;
+                font-size: 11px;
+                font-weight: normal;
+                text-decoration: none;
+                white-space: nowrap;
+                opacity: 1;
+                text-shadow: none;
+                margin: 0;
+            }
+
+            .dropdown-menu a:hover {
+                background-color: #7a1414;
+                color: #ffffff;
+                text-decoration: none;
+            }
+
+            .clearfix {
+                clear: both;
+            }
+        </style>
+    </head>
+    <body>
+        <div
+            class="wrapper"
+            style="margin-bottom: 0; padding-bottom: 0; border-bottom: none overflow: hidden;"
+        >
+            <div class="header-area">
+                <div>
+                    <h1 class="main-title">Ecureuil</h1>
+                    <span class="subtitle" id="subTitle"
+                        >There's no competition.</span
+                    >
+                </div>
+                <img
+                    src="https://github.com/fraaaaa4/ecureuil-website/blob/8373c11e57fa7a68ab196a224b188475e1d496fb/title.png?raw=true"
+                />
+            </div>
+        </div>
+
+        <div class="bar" style="margin-top: 1px">
+            <div class="mosaic-bg">
+                <span class="tile t1"></span><span class="tile t3"></span
+                ><span class="tile t2"></span><span class="tile t4"></span
+                ><span class="tile t5"></span><span class="tile t1"></span
+                ><span class="tile t2"></span><span class="tile t6"></span
+                ><span class="tile t3"></span><span class="tile t1"></span
+                ><span class="tile t4"></span><span class="tile t2"></span
+                ><span class="tile t5"></span><span class="tile t3"></span
+                ><span class="tile t1"></span><span class="tile t4"></span
+                ><span class="tile t2"></span><span class="tile t3"></span
+                ><span class="tile t1"></span><span class="tile t5"></span
+                ><span class="tile t2"></span><span class="tile t4"></span
+                ><span class="tile t3"></span><span class="tile t1"></span
+                ><span class="tile t6"></span><span class="tile t2"></span
+                ><span class="tile t5"></span><span class="tile t3"></span>
+            </div>
+
+            <!-- Link allineati a destra in primo piano -->
+            <div class="bar-content">
+                <!-- Desktop Links -->
+                <span class="bar-desktop-links">
+                    <a href="https://github.com/fraaaaa4/ecureuil"
+                        >REPOSITORY</a
+                    >
+                    <a
+                        href="https://github.com/fraaaaa4/ecureuil-discovery-sources"
+                        >DISCOVER REPO</a
+                    >
+                    <a
+                        href="https://github.com/fraaaaa4/ecureuil-source-example"
+                        >EXAMPLE SOURCE</a
+                    >
+                    <div class="download-dropdown">
+                        <a
+                            href="#"
+                            class="btn-download"
+                            style="margin-top: -1px"
+                            >DOWNLOAD</a
+                        >
+                        <div class="dropdown-menu">
+                            <a
+                                href="https://github.com/fraaaaa4/ecureuil/releases/download/0.3/Ecureuil.NET.4.5.zip"
+                                >.NET 4.5 Version</a
+                            >
+                            <a
+                                href="https://github.com/fraaaaa4/ecureuil/releases/download/0.3_NET_2/Ecureuil.NET.2.0.zip"
+                                >.NET 2.0 Version</a
+                            >
+                        </div>
+                    </div>
+                </span>
+
+                <!-- Mobile / Small screen Overflow Chevron (>>) -->
+                <div class="bar-overflow">
+                    <a href="#" class="btn-chevron" onclick="return false;"
+                        >&gt;&gt;</a
+                    >
+                    <div class="dropdown-menu">
+                        <a href="https://github.com/fraaaaa4/ecureuil"
+                            >REPOSITORY</a
+                        >
+                        <a
+                            href="https://github.com/fraaaaa4/ecureuil-discovery-sources"
+                            >DISCOVER REPO</a
+                        >
+                        <a
+                            href="https://github.com/fraaaaa4/ecureuil-source-example"
+                            >EXAMPLE SOURCE</a
+                        >
+                        <hr
+                            style="
+                                border: 0;
+                                border-top: 1px solid #4a0d0d;
+                                border-bottom: 1px solid #992222;
+                                margin: 3px 0;
+                            "
+                        />
+                        <a
+                            href="https://github.com/fraaaaa4/ecureuil/releases/download/0.3/Ecureuil.NET.4.5.zip"
+                            >DOWNLOAD (.NET 4.5)</a
+                        >
+                        <a
+                            href="https://github.com/fraaaaa4/ecureuil/releases/download/0.3_NET_2/Ecureuil.NET.2.0.zip"
+                            >DOWNLOAD (.NET 2.0)</a
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="wrapper"
+            style="margin-top: 0; border-top: none; padding-top: 10px"
+        >
+            <div class="content-section" style="margin-top: 5px">
+                <p>
+                    <strong>Ecureuil is your all-in-one package manager</strong>
+                    for all versions of Windows.
+                </p>
+                <img
+                    src="https://github.com/fraaaaa4/ecureuil-website/raw/c2dd3d5b0ae7e6d5834642b88cfb3a57c3f3ac93/1.png"
+                    alt="Screenshot 1"
+                    class="app-screenshot-left"
+                    width="160"
+                />
+                <p>
+                    Supports
+                    <strong>Windows 2000 or superior</strong> (including Windows
+                    RT and Windows on ARM), it lets you easily install all your
+                    favourite apps from online sources, all with a single click.
+                    Discover apps, search by name or description, select the
+                    categories they interest you, group them in architecture,
+                    and much much more.
+                </p>
+                <p>
+                    You can add sources to your client either via an URL, or by
+                    adding sources from the
+                    <strong>Discover sources</strong> section; on the latter,
+                    you don't need to touch your keyboard once, all done via the
+                    mouse!
+                </p>
+                <img
+                    src="https://github.com/fraaaaa4/ecureuil-website/raw/c2dd3d5b0ae7e6d5834642b88cfb3a57c3f3ac93/2.png"
+                    alt="Screenshot 2"
+                    class="app-screenshot-right"
+                    width="160"
+                />
+                <p>
+                    Before installing an app, you can check various details of
+                    an app, such as its screenshots, what type of installer is,
+                    additional links inserted by the developer, languages
+                    supported etc. Compatibility is also checked automatically
+                    based on your current operating system and architecture.
+                </p>
+                <img
+                    src="https://github.com/fraaaaa4/ecureuil-website/raw/c2dd3d5b0ae7e6d5834642b88cfb3a57c3f3ac93/3.png"
+                    alt="Screenshot 3"
+                    class="app-screenshot-left"
+                    width="160"
+                />
+                <p>
+                    It manages portable and apps with setup as if they were one.
+                    If your app is portable, it gets added automatically to the
+                    start menu and desktop (if you will); if your app is inside
+                    a zip file, it'll extract it and automatically execute the
+                    setup file.
+                </p>
+                <p>
+                    And to uninstall a portable app, you can do that directly
+                    from Ecureuil, as if it was installed with a setup! Fully
+                    customisable on where you choose to save or store caches and
+                    all.
+                </p>
+                <hr
+                    style="
+                        border: 0;
+                        border-top: 1px solid #dbdbdb;
+                        margin: 15px -5px;
+                    "
+                />
+                <p>
+                    Discover some of the featured sources! Click on an image to
+                    copy its link, which then you can add directly in Ecureuil.
+                </p>
+            </div>
+
+            <div class="source-cloud" id="sourceCloud">
+                <a
+                    href="https://fraaaaa4.github.io/Ecureuil-fratta-apps/sources.json"
+                    class="source-item pos-1"
+                >
+                    <img
+                        src="https://avatars.githubusercontent.com/u/87281326?v=4"
+                    />
+                    <div class="source-desc">
+                        <strong>Fratta's Ecureuil source</strong>
+                        <span>The developer of Ecureuil's personal source</span>
+                    </div>
+                </a>
+                <a
+                    href="https://hamed7ir.github.io/ecureuil-hamed7ir-apps/sources.json"
+                    class="source-item pos-3"
+                >
+                    <img
+                        src="https://avatars.githubusercontent.com/u/30177186?v=4"
+                    />
+                    <div class="source-desc">
+                        <strong>hamed7ir's Ecureuil source</strong>
+                        <span
+                            >ARM32 applications for Windows RT and Windows 10
+                            ARM32, built and tested on Surface RT and Surface 2
+                            hardware.</span
+                        >
+                    </div>
+                </a>
+            </div>
+        </div>
+        <script type="text/javascript">
+            (function () {
+                var cloud = document.getElementById("sourceCloud");
+                if (!cloud) return;
+                var items = cloud.getElementsByTagName("a");
+
+                var targetX = 0,
+                    targetY = 0;
+                var currentX = 0,
+                    currentY = 0;
+                var isAnimating = false;
+
+                cloud.onmousemove = function (e) {
+                    e = e || window.event;
+                    var rect = cloud.getBoundingClientRect();
+                    targetX = e.clientX - rect.left - rect.width / 2;
+                    targetY = e.clientY - rect.top - rect.height / 2;
+
+                    if (!isAnimating) {
+                        isAnimating = true;
+                        animate();
+                    }
+                };
+
+                cloud.onmouseleave = function () {
+                    targetX = 0;
+                    targetY = 0;
+                    if (!isAnimating) {
+                        isAnimating = true;
+                        animate();
+                    }
+                };
+
+                var baseTop = [];
+                for (var k = 0; k < items.length; k++) {
+                    var computed = window.getComputedStyle
+                        ? window.getComputedStyle(items[k])
+                        : items[k].currentStyle;
+                    baseTop[k] = parseFloat(computed ? computed.top : 0) || 0;
+                }
+
+                function animate() {
+                    currentX += (targetX - currentX) * 0.08;
+                    currentY += (targetY - currentY) * 0.08;
+
+                    for (var i = 0; i < items.length; i++) {
+                        var factor = ((i % 3) + 1) * 0.04;
+                        items[i].style.left = currentX * factor + "px";
+                        items[i].style.top =
+                            baseTop[i] + currentY * factor + "px";
+                    }
+
+                    if (
+                        Math.abs(targetX - currentX) > 0.05 ||
+                        Math.abs(targetY - currentY) > 0.05
+                    ) {
+                        if (window.requestAnimationFrame) {
+                            requestAnimationFrame(animate);
+                        } else {
+                            setTimeout(animate, 16);
+                        }
+                    } else {
+                        currentX = targetX;
+                        currentY = targetY;
+                        for (var j = 0; j < items.length; j++) {
+                            if (targetX === 0 && targetY === 0) {
+                                items[j].style.left = "";
+                                items[j].style.top = "";
+                            } else {
+                                var f = ((j % 3) + 1) * 0.04;
+                                items[j].style.left = currentX * f + "px";
+                                items[j].style.top =
+                                    baseTop[j] + currentY * f + "px";
+                            }
+                        }
+                        isAnimating = false;
+                    }
+                }
+
+                var subTitleElement = document.getElementById("subTitle");
+                if (subTitleElement) {
+                    var subtitles = [
+                        "There's no competition.",
+                        "It's that easy.",
+                        "no way, cydia for winrt",
+                        "Yes it's on ARM too",
+                        "Install with one click btw",
+                        "Hyperdemo!",
+                        "Windows RT rules",
+                        "Who said retro is useless?",
+                        "Developers! Developers! Developers!",
+                        "Create your own sources too! Anybody can!",
+                    ];
+
+                    var randomIndex = Math.floor(
+                        Math.random() * subtitles.length,
+                    );
+                    subTitleElement.innerHTML = subtitles[randomIndex];
+                }
+
+                function copyText(text) {
+                    if (window.clipboardData && window.clipboardData.setData) {
+                        return window.clipboardData.setData("Text", text);
+                    } else if (
+                        navigator.clipboard &&
+                        navigator.clipboard.writeText
+                    ) {
+                        navigator.clipboard.writeText(text);
+                    } else {
+                        var textarea = document.createElement("textarea");
+                        textarea.value = text;
+                        textarea.style.position = "fixed";
+                        textarea.style.left = "-9999px";
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        try {
+                            document.execCommand("copy");
+                        } catch (err) {}
+                        document.body.removeChild(textarea);
+                    }
+                }
+
+                for (var i = 0; i < items.length; i++) {
+                    items[i].onclick = function (e) {
+                        e = e || window.event;
+
+                        if (e.preventDefault) e.preventDefault();
+                        else e.returnValue = false;
+                        var linkToCopy = this.getAttribute("href");
+                        copyText(linkToCopy);
+
+                        var desc = this.getElementsByTagName("strong")[0];
+                        if (desc) {
+                            var originalText = desc.innerHTML;
+                            desc.innerHTML = "Link copied";
+                            var el = desc;
+                            setTimeout(function () {
+                                el.innerHTML = originalText;
+                            }, 1200);
+                        }
+                        return false;
+                    };
+                }
+            })();
+        </script>
+
+        <div class="bottom-text">
+            <span>Made in 2026 by Fratta</span>
+        </div>
+    </body>
 </html>
